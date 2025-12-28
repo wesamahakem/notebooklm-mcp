@@ -164,11 +164,13 @@ src/notebooklm_consumer_mcp/
 - Free tier: ~50 queries/day
 - Wait until the next day or upgrade to Plus
 
-## API Reference
+## Documentation
+
+### API Reference
 
 **For detailed API documentation** (RPC IDs, parameter structures, response formats), see:
 
-**[API_REFERENCE.md](./API_REFERENCE.md)**
+**[docs/API_REFERENCE.md](./docs/API_REFERENCE.md)**
 
 This includes:
 - All discovered RPC endpoints and their parameters
@@ -183,16 +185,35 @@ Only read API_REFERENCE.md when:
 - Adding new features
 - Understanding internal API behavior
 
+### MCP Test Plan
+
+**For comprehensive MCP tool testing**, see:
+
+**[docs/MCP_TEST_PLAN.md](./docs/MCP_TEST_PLAN.md)**
+
+This includes:
+- Step-by-step test cases for all 30 MCP tools
+- Authentication and basic operations tests
+- Source management and Drive sync tests
+- Studio content generation tests (audio, video, infographics, etc.)
+- Quick copy-paste test prompts for validation
+
+Use this test plan when:
+- Validating MCP server functionality after code changes
+- Testing new tool implementations
+- Debugging MCP tool issues
+
 ## Contributing
 
 When adding new features:
 
 1. Use Chrome DevTools MCP to capture the network request
-2. Document the RPC ID in API_REFERENCE.md
+2. Document the RPC ID in docs/API_REFERENCE.md
 3. Add the param structure with comments
 4. Update the api_client.py with the new method
 5. Add corresponding tool in server.py
 6. Update the "Features NOT Yet Implemented" checklist
+7. Add test case to docs/MCP_TEST_PLAN.md
 
 ## License
 
