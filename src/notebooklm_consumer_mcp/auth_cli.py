@@ -95,6 +95,7 @@ def launch_chrome(port: int, headless: bool = False) -> bool:
         "--no-default-browser-check",
         "--disable-extensions",  # Bypass extensions that may interfere (e.g., Antigravity IDE)
         f"--user-data-dir={temp_profile_dir}",  # Must be non-default for Chrome 136+
+        "--remote-allow-origins=*",  # Allow WebSocket connections from any origin
     ]
 
     if headless:
