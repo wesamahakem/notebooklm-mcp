@@ -134,7 +134,7 @@ claude mcp add notebooklm-consumer-mcp -- notebooklm-consumer-mcp
 
 **Gemini CLI:**
 ```bash
-gemini mcp add notebooklm-consumer-mcp -- notebooklm-consumer-mcp
+gemini mcp add notebooklm-consumer notebooklm-consumer-mcp
 ```
 
 **Manual (settings.json):**
