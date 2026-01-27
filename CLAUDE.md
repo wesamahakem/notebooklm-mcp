@@ -144,6 +144,9 @@ src/notebooklm_tools/
 
 | `studio_status` | Check studio artifact generation status |
 | `studio_delete` | Delete studio artifacts (REQUIRES confirmation) |
+| `notebook_share_status` | Get sharing settings and collaborators |
+| `notebook_share_public` | Enable/disable public link access |
+| `notebook_share_invite` | Invite collaborator by email |
 | `save_auth_tokens` | Save tokens extracted via Chrome DevTools MCP |
 
 **IMPORTANT - Operations Requiring Confirmation:**
@@ -156,7 +159,6 @@ src/notebooklm_tools/
 ## Features NOT Yet Implemented
 
 - [ ] **Notes** - Save chat responses as notes
-- [ ] **Share notebook** - Collaboration features
 - [ ] **Export** - Download content
 
 ## Troubleshooting

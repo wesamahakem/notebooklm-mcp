@@ -42,6 +42,9 @@ An MCP server for **NotebookLM** (notebooklm.google.com).
 | `slide_deck_create` | Generate slide decks (requires confirmation) |
 | `studio_status` | Check studio artifact generation status |
 | `studio_delete` | Delete studio artifacts (requires confirmation) |
+| `notebook_share_status` | Get sharing settings and collaborators |
+| `notebook_share_public` | Enable/disable public link access |
+| `notebook_share_invite` | Invite collaborator by email |
 | `refresh_auth` | Reload auth tokens from disk or run headless re-auth |
 | `save_auth_tokens` | Save cookies for authentication |
 
@@ -152,9 +155,9 @@ For detailed instructions, troubleshooting, and how the authentication system wo
 
 ## MCP Configuration
 
-> **⚠️ Context Window Warning:** This MCP provides **31 tools** which consume a significant portion of your context window. It's recommended to **disable the MCP when not actively using NotebookLM** to preserve context for your other work. In Claude Code, use `@notebooklm-mcp` to toggle it on/off, or use `/mcp` command.
+> **⚠️ Context Window Warning:** This MCP provides **34 tools** which consume a significant portion of your context window. It's recommended to **disable the MCP when not actively using NotebookLM** to preserve context for your other work. In Claude Code, use `@notebooklm-mcp` to toggle it on/off, or use `/mcp` command.
 
-> **⚠️ Context Window Warning:** This MCP provides **31 tools** which consume a significant portion of your context window. It's recommended to **disable the MCP when not actively using NotebookLM** to preserve context for your other work. In Claude Code, use `@notebooklm-mcp` to toggle it on/off, or use `/mcp` command.
+> **⚠️ Context Window Warning:** This MCP provides **34 tools** which consume a significant portion of your context window. It's recommended to **disable the MCP when not actively using NotebookLM** to preserve context for your other work. In Claude Code, use `@notebooklm-mcp` to toggle it on/off, or use `/mcp` command.
  
 ### CLI Options
 
@@ -359,6 +362,14 @@ Simply chat with your AI tool (Claude Code, Cursor, Gemini CLI) using natural la
 - "Show me all the sources in this notebook with their freshness status"
 - "Delete this source from the notebook"
 - "Check the status of my audio overview generation"
+
+### Sharing & Collaboration
+
+- "Show me the sharing settings for this notebook"
+- "Make this notebook public so anyone with the link can view it"
+- "Disable public access to this notebook"
+- "Invite user@example.com as an editor to this notebook"
+- "Add a viewer to my research notebook"
 
 **Pro tip:** After creating studio content (audio, video, reports, etc.), poll the status to get download URLs when generation completes.
 

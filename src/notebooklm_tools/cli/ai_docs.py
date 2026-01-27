@@ -100,6 +100,7 @@ nlm status artifacts <notebook>
 | `nlm infographic` | Create infographics (create) |
 | `nlm video` | Create video overviews (create) |
 | `nlm data-table` | Create data tables (create) |
+| `nlm share` | Manage notebook sharing (status, public, private, invite) |
 
 ### All Verb-First Commands
 
@@ -522,6 +523,26 @@ nlm get alias <name>            # Get UUID for alias
 nlm list aliases                # List all aliases
 nlm show aliases                # Alternative: show all aliases
 nlm delete alias <name>         # Remove alias
+```
+
+### Share Commands
+
+**Noun-First:**
+```bash
+nlm share status <notebook-id>              # View sharing settings + collaborators
+nlm share status <notebook-id> --json       # JSON output
+nlm share public <notebook-id>              # Enable public link access
+nlm share private <notebook-id>             # Disable public link access
+nlm share invite <notebook-id> <email>      # Invite as viewer (default)
+nlm share invite <notebook-id> <email> --role editor  # Invite as editor
+```
+
+**Verb-First:**
+```bash
+nlm share status <notebook-id>              # View sharing settings (same as noun-first)
+nlm share public <notebook-id>              # Enable public access
+nlm share private <notebook-id>             # Disable public access
+nlm share invite <notebook-id> <email> --role viewer  # Invite collaborator
 ```
 
 ### Config Commands
