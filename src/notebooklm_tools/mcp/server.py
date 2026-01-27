@@ -572,6 +572,102 @@ def chat_configure(
 
 
 @logged_tool()
+def notebook_share_status(notebook_id: str) -> dict[str, Any]:
+    """Get current sharing settings and collaborators.
+
+    Args:
+        notebook_id: Notebook UUID
+
+    Returns: is_public, access_level, collaborators list, and public_link if public
+    """
+    try:
+        client = get_client()
+        status = client.get_share_status(notebook_id)
+
+        return {
+            "status": "success",
+            "is_public": status.is_public,
+            "access_level": status.access_level,
+            "public_link": status.public_link,
+            "collaborators": [
+                {
+                    "email": c.email,
+                    "role": c.role,
+                    "is_pending": c.is_pending,
+                    "display_name": c.display_name,
+                }
+                for c in status.collaborators
+            ],
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@logged_tool()
+def notebook_share_public(
+    notebook_id: str,
+    is_public: bool = True,
+) -> dict[str, Any]:
+    """Enable or disable public link access.
+
+    Args:
+        notebook_id: Notebook UUID
+        is_public: True to enable public link, False to disable (default: True)
+
+    Returns: public_link if enabled, None if disabled
+    """
+    try:
+        client = get_client()
+        public_link = client.set_public_access(notebook_id, is_public)
+
+        return {
+            "status": "success",
+            "is_public": is_public,
+            "public_link": public_link,
+            "message": f"Public access {'enabled' if is_public else 'disabled'}",
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@logged_tool()
+def notebook_share_invite(
+    notebook_id: str,
+    email: str,
+    role: str = "viewer",
+) -> dict[str, Any]:
+    """Invite a collaborator by email.
+
+    Args:
+        notebook_id: Notebook UUID
+        email: Email address to invite
+        role: "viewer" or "editor" (default: viewer)
+
+    Returns: success status
+    """
+    if role.lower() not in ("viewer", "editor"):
+        return {
+            "status": "error",
+            "error": f"Invalid role '{role}'. Must be 'viewer' or 'editor'.",
+        }
+
+    try:
+        client = get_client()
+        result = client.add_collaborator(notebook_id, email, role=role.lower())
+
+        if result:
+            return {
+                "status": "success",
+                "message": f"Invited {email} as {role}",
+                "email": email,
+                "role": role.lower(),
+            }
+        return {"status": "error", "error": "Failed to invite collaborator"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@logged_tool()
 def source_list_drive(notebook_id: str) -> dict[str, Any]:
     """List sources with types and Drive freshness status.
 

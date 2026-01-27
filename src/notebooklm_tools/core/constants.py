@@ -308,3 +308,24 @@ REPORT_FORMAT_BRIEFING_DOC = "Briefing Doc"
 REPORT_FORMAT_STUDY_GUIDE = "Study Guide"
 REPORT_FORMAT_BLOG_POST = "Blog Post"
 REPORT_FORMAT_CUSTOM = "Create Your Own"
+
+# =============================================================================
+# Sharing / Access Control
+# =============================================================================
+SHARE_ROLE_OWNER = 1
+SHARE_ROLE_EDITOR = 2
+SHARE_ROLE_VIEWER = 3
+
+SHARE_ROLES = CodeMapper({
+    "owner": SHARE_ROLE_OWNER,
+    "editor": SHARE_ROLE_EDITOR,
+    "viewer": SHARE_ROLE_VIEWER,
+})
+
+SHARE_ACCESS_RESTRICTED = 0
+SHARE_ACCESS_PUBLIC = 1
+
+SHARE_ACCESS_LEVELS = CodeMapper({
+    "restricted": SHARE_ACCESS_RESTRICTED,
+    "public": SHARE_ACCESS_PUBLIC,
+})

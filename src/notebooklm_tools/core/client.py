@@ -53,6 +53,8 @@ RPC_NAMES = {
     "CYK0Xb": "save_mind_map",
     "cFji9": "list_mind_maps",
     "AH0mwd": "delete_mind_map",
+    "QDyure": "share_notebook",
+    "JFMDGd": "get_share_status",
 }
 
 
@@ -180,6 +182,23 @@ class ConversationTurn:
     answer: str      # The AI's response
     turn_number: int  # 1-indexed turn number in the conversation
 
+
+@dataclass
+class Collaborator:
+    """A user with access to a notebook."""
+    email: str
+    role: str  # "owner", "editor", "viewer"
+    is_pending: bool = False
+    display_name: str | None = None
+
+
+@dataclass
+class ShareStatus:
+    """Current sharing state of a notebook."""
+    is_public: bool
+    access_level: str  # "restricted" or "public"
+    collaborators: list[Collaborator]
+    public_link: str | None = None
 
 
 
@@ -381,6 +400,17 @@ class NotebookLMClient:
     SOURCE_TYPE_GOOGLE_DOCS = constants.SOURCE_TYPE_GOOGLE_DOCS
     SOURCE_TYPE_GOOGLE_OTHER = constants.SOURCE_TYPE_GOOGLE_OTHER
     SOURCE_TYPE_PASTED_TEXT = constants.SOURCE_TYPE_PASTED_TEXT
+
+    # Sharing RPCs
+    RPC_SHARE_NOTEBOOK = "QDyure"    # Set sharing settings (visibility, collaborators)
+    RPC_GET_SHARE_STATUS = "JFMDGd"  # Get current share status
+
+    # Sharing role/access constants
+    SHARE_ROLE_OWNER = constants.SHARE_ROLE_OWNER
+    SHARE_ROLE_EDITOR = constants.SHARE_ROLE_EDITOR
+    SHARE_ROLE_VIEWER = constants.SHARE_ROLE_VIEWER
+    SHARE_ACCESS_RESTRICTED = constants.SHARE_ACCESS_RESTRICTED
+    SHARE_ACCESS_PUBLIC = constants.SHARE_ACCESS_PUBLIC
 
     # Query endpoint (different from batchexecute - streaming gRPC-style)
     QUERY_ENDPOINT = "/_/LabsTailwindUi/data/google.internal.labs.tailwind.orchestration.v1.LabsTailwindOrchestrationService/GenerateFreeFormStreamed"
@@ -1252,10 +1282,147 @@ class NotebookLMClient:
 
         return result is not None
 
+    # =========================================================================
+    # Sharing Operations
+    # =========================================================================
+
+    def get_share_status(self, notebook_id: str) -> ShareStatus:
+        """Get current sharing settings and collaborators.
+
+        Args:
+            notebook_id: The notebook UUID
+
+        Returns:
+            ShareStatus with collaborators list, public access status, and link
+        """
+        params = [notebook_id, [2]]
+        result = self._call_rpc(self.RPC_GET_SHARE_STATUS, params)
+
+        # Parse collaborators from response
+        # Response structure: [[collaborator_data...], access_info, ...]
+        collaborators: list[Collaborator] = []
+        is_public = False
+        public_link = None
+
+        if result and isinstance(result, list):
+            # Parse collaborators (usually at position 0 or 1)
+            for item in result:
+                if isinstance(item, list):
+                    for entry in item:
+                        if isinstance(entry, list) and len(entry) >= 2:
+                            # Collaborator format: [email, role_code, [], [name, avatar_url]]
+                            email = entry[0] if entry[0] else None
+                            if email and isinstance(email, str) and "@" in email:
+                                role_code = entry[1] if len(entry) > 1 and isinstance(entry[1], int) else 3
+                                role = constants.SHARE_ROLES.get_name(role_code)
+                                # Name is in entry[3][0] if present
+                                display_name = None
+                                if len(entry) > 3 and isinstance(entry[3], list) and len(entry[3]) > 0:
+                                    display_name = entry[3][0]
+                                # Pending invites may have additional flag
+                                is_pending = len(entry) > 4 and entry[4] is True
+                                collaborators.append(Collaborator(
+                                    email=email,
+                                    role=role,
+                                    is_pending=is_pending,
+                                    display_name=str(display_name) if display_name else None,
+                                ))
+
+
+            # Check for public access flag
+            # Usually indicated by access level code in the response
+            # Position varies; look for [1] pattern indicating public
+            for item in result:
+                if isinstance(item, list) and len(item) >= 1:
+                    if item[0] == 1:  # Public access indicator
+                        is_public = True
+                        break
+
+        # Construct public link if public
+        if is_public:
+            public_link = f"https://notebooklm.google.com/notebook/{notebook_id}"
+
+        access_level = "public" if is_public else "restricted"
+
+        return ShareStatus(
+            is_public=is_public,
+            access_level=access_level,
+            collaborators=collaborators,
+            public_link=public_link,
+        )
+
+    def set_public_access(self, notebook_id: str, is_public: bool = True) -> str | None:
+        """Toggle public link access for a notebook.
+
+        Args:
+            notebook_id: The notebook UUID
+            is_public: True to enable public link, False to disable
+
+        Returns:
+            The public URL if enabled, None if disabled
+        """
+        # Payload: [[[notebook_id, null, [access_level], [notify, ""]]], 1, null, [2]]
+        # access_level: 0 = restricted, 1 = public
+        access_code = self.SHARE_ACCESS_PUBLIC if is_public else self.SHARE_ACCESS_RESTRICTED
+
+        params = [
+            [[notebook_id, None, [access_code], [0, ""]]],
+            1,
+            None,
+            [2]
+        ]
+
+        result = self._call_rpc(self.RPC_SHARE_NOTEBOOK, params)
+
+        if is_public:
+            return f"https://notebooklm.google.com/notebook/{notebook_id}"
+        return None
+
+    def add_collaborator(
+        self,
+        notebook_id: str,
+        email: str,
+        role: str = "viewer",
+        notify: bool = True,
+        message: str = "",
+    ) -> bool:
+        """Add a collaborator to a notebook by email.
+
+        Args:
+            notebook_id: The notebook UUID
+            email: Email address of the collaborator
+            role: "viewer" or "editor" (default: viewer)
+            notify: Send email notification (default: True)
+            message: Optional welcome message
+
+        Returns:
+            True if successful
+        """
+        # Validate role
+        role_code = constants.SHARE_ROLES.get_code(role)
+        if role_code == constants.SHARE_ROLE_OWNER:
+            raise ValueError("Cannot add collaborator as owner")
+
+        # Payload: [[[notebook_id, [[email, null, role_code]], null, [notify_flag, message]]], 1, null, [2]]
+        notify_flag = 0 if notify else 1  # 0 = notify, 1 = don't notify
+
+        params = [
+            [[notebook_id, [[email, None, role_code]], None, [notify_flag, message]]],
+            1,
+            None,
+            [2]
+        ]
+
+        result = self._call_rpc(self.RPC_SHARE_NOTEBOOK, params)
+
+        # Success if result is not None (no error thrown)
+        return result is not None
+
     def check_source_freshness(self, source_id: str) -> bool | None:
         """Check if a Drive source is fresh (up-to-date with Google Drive).
-    """
+        """
         client = self._get_client()
+
 
         params = [None, [source_id], [2]]
         body = self._build_request_body(self.RPC_CHECK_FRESHNESS, params)
@@ -3438,6 +3605,9 @@ class NotebookLMClient:
 
             return await self._download_url(url, output_path, progress_callback)
 
+        except (IndexError, TypeError, AttributeError) as e:
+            raise ArtifactParseError("infographic", details=str(e)) from e
+
 
     async def download_slide_deck(
         self,
@@ -3492,6 +3662,9 @@ class NotebookLMClient:
                 raise ArtifactDownloadError("slide_deck", details="No download URL found")
 
             return await self._download_url(pdf_url, output_path, progress_callback)
+
+        except (IndexError, TypeError, AttributeError) as e:
+            raise ArtifactParseError("slide_deck", details=str(e)) from e
 
         
     def download_report(
