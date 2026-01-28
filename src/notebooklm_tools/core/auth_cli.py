@@ -344,28 +344,32 @@ def run_headless_auth(port: int = 9223, timeout: int = 30) -> AuthTokens | None:
     # Check if profile exists with saved login
     if not has_chrome_profile():
         return None
-    
-    # Check if our profile is already in use
-    if is_our_chrome_profile_in_use():
-        return None
-    
+
     chrome_process: subprocess.Popen | None = None
+    chrome_was_running = False
+
     try:
-        # Launch Chrome in headless mode
-        chrome_process = launch_chrome(port, headless=True)
-        if not chrome_process:
-            return None
-        
-        # Wait for Chrome debugger to be ready
-        debugger_url = None
-        for _ in range(5):  # Try up to 5 times
-            debugger_url = get_chrome_debugger_url(port)
-            if debugger_url:
-                break
-            time.sleep(1)
-        
-        if not debugger_url:
-            return None
+        # Try to connect to existing Chrome first
+        debugger_url = get_chrome_debugger_url(port)
+
+        if debugger_url:
+            # Chrome already running - use existing instance
+            chrome_was_running = True
+        else:
+            # No Chrome running - launch in headless mode
+            chrome_process = launch_chrome(port, headless=True)
+            if not chrome_process:
+                return None
+
+            # Wait for Chrome debugger to be ready
+            for _ in range(5):  # Try up to 5 times
+                debugger_url = get_chrome_debugger_url(port)
+                if debugger_url:
+                    break
+                time.sleep(1)
+
+            if not debugger_url:
+                return None
         
         # Find or create NotebookLM page
         page = find_or_create_notebooklm_page(port)
@@ -409,8 +413,9 @@ def run_headless_auth(port: int = 9223, timeout: int = 30) -> AuthTokens | None:
         return None
         
     finally:
-        # IMPORTANT: Always terminate headless Chrome
-        if chrome_process:
+        # IMPORTANT: Only terminate Chrome if we launched it
+        # Don't terminate if we connected to existing Chrome instance
+        if chrome_process and not chrome_was_running:
             try:
                 chrome_process.terminate()
                 chrome_process.wait(timeout=5)
