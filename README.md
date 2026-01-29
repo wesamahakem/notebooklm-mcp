@@ -160,11 +160,15 @@ uv tool uninstall notebooklm-cli
 uv tool uninstall notebooklm-mcp-server
 ```
 
-### Step 3: Install the Unified Package
+### Step 3: Reinstall the Unified Package
+
+After removing legacy packages, reinstall to fix symlinks:
 
 ```bash
-uv tool install notebooklm-mcp-cli
+uv tool install --force notebooklm-mcp-cli
 ```
+
+> **Why `--force`?** When multiple packages provide the same executable, `uv` can leave broken symlinks after uninstalling. The `--force` flag ensures clean symlinks.
 
 ### Step 4: Verify Installation
 
