@@ -1,7 +1,6 @@
 import asyncio
 import typer
 from typing import Optional, Callable, Any
-from pathlib import Path
 from rich.console import Console
 from rich.progress import (
     Progress,
@@ -56,6 +55,27 @@ def download_with_progress(
 
         return download_func(update_progress)
 
+
+def simple_download(
+    download_func: Callable[[NotebookLMClient], str],
+    artifact_name: str,
+) -> None:
+    """Common pattern for simple (non-streaming) downloads.
+
+    Args:
+        download_func: Function that takes client and returns saved path
+        artifact_name: Human-readable name for error messages
+    """
+    client = get_client()
+    try:
+        saved = download_func(client)
+        console.print(f"[green]✓[/green] Downloaded {artifact_name} to: {saved}")
+    except ArtifactNotReadyError:
+        console.print(f"[red]Error:[/red] {artifact_name} is not ready or does not exist.", err=True)
+        raise typer.Exit(1)
+    except Exception as e:
+        handle_error(e)
+
 @app.command("audio")
 def download_audio(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
@@ -109,16 +129,11 @@ def download_report(
     artifact_id: Optional[str] = typer.Option(None, "--id", help="Specific artifact ID")
 ):
     """Download Report (Markdown)."""
-    client = get_client()
-    try:
-        path = output or f"{notebook_id}_report.md"
-        saved = client.download_report(notebook_id, path, artifact_id)
-        typer.echo(f"Downloaded report to: {saved}")
-    except ArtifactNotReadyError:
-        typer.echo("Error: Report is not ready or does not exist.", err=True)
-        raise typer.Exit(1)
-    except Exception as e:
-        handle_error(e)
+    path = output or f"{notebook_id}_report.md"
+    simple_download(
+        lambda client: client.download_report(notebook_id, path, artifact_id),
+        "report"
+    )
 
 @app.command("mind-map")
 def download_mind_map(
@@ -127,16 +142,11 @@ def download_mind_map(
     artifact_id: Optional[str] = typer.Option(None, "--id", help="Specific artifact ID (note ID)")
 ):
     """Download Mind Map (JSON)."""
-    client = get_client()
-    try:
-        path = output or f"{notebook_id}_mindmap.json"
-        saved = client.download_mind_map(notebook_id, path, artifact_id)
-        typer.echo(f"Downloaded mind map to: {saved}")
-    except ArtifactNotReadyError:
-        typer.echo("Error: Mind map is not ready or does not exist.", err=True)
-        raise typer.Exit(1)
-    except Exception as e:
-        handle_error(e)
+    path = output or f"{notebook_id}_mindmap.json"
+    simple_download(
+        lambda client: client.download_mind_map(notebook_id, path, artifact_id),
+        "mind map"
+    )
 
 @app.command("slide-deck")
 def download_slide_deck(
@@ -191,16 +201,11 @@ def download_data_table(
     artifact_id: Optional[str] = typer.Option(None, "--id", help="Specific artifact ID")
 ):
     """Download Data Table (CSV)."""
-    client = get_client()
-    try:
-        path = output or f"{notebook_id}_table.csv"
-        saved = client.download_data_table(notebook_id, path, artifact_id)
-        typer.echo(f"Downloaded data table to: {saved}")
-    except ArtifactNotReadyError:
-        typer.echo("Error: Data table is not ready or does not exist.", err=True)
-        raise typer.Exit(1)
-    except Exception as e:
-        handle_error(e)
+    path = output or f"{notebook_id}_table.csv"
+    simple_download(
+        lambda client: client.download_data_table(notebook_id, path, artifact_id),
+        "data table"
+    )
 
 
 @app.command("quiz")

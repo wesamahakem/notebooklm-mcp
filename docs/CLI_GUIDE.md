@@ -163,6 +163,24 @@ nlm notebook get myproject
 nlm source list myproject
 ```
 
+### Skills (AI Assistant Integration)
+
+```bash
+nlm skill list                           # Show installation status
+nlm skill install claude-code            # Install for Claude Code
+nlm skill install cursor                 # Install for Cursor AI
+nlm skill install gemini-cli             # Install for Gemini CLI
+nlm skill install <tool> --level project # Install at project level
+nlm skill uninstall <tool>               # Remove skill
+nlm skill show                           # View skill content
+
+# Verb-first alternatives
+nlm install skill claude-code
+nlm list skills
+```
+
+**Supported Tools:** `claude-code`, `cursor`, `codex`, `opencode`, `gemini-cli`, `antigravity`, `other`
+
 ---
 
 ## Output Formats

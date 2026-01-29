@@ -73,6 +73,12 @@ from notebooklm_tools.cli.commands.config import (
     get_config_value,
     set_config_value,
 )
+from notebooklm_tools.cli.commands.skill import (
+    install as skill_install,
+    uninstall as skill_uninstall,
+    list_tools as skill_list,
+    show as skill_show,
+)
 
 # =============================================================================
 # CREATE verb
@@ -229,6 +235,12 @@ def list_stale_sources_verb(
 ) -> None:
     """List Drive sources that need syncing."""
     list_stale_sources(notebook, json_output, profile)
+
+
+@list_app.command("skills")
+def list_skills_verb() -> None:
+    """List available skills and installation status."""
+    skill_list()
 
 
 # =============================================================================
@@ -673,3 +685,42 @@ def show_config_verb(
 def show_aliases_verb() -> None:
     """Show all aliases."""
     list_aliases()
+
+
+@show_app.command("skill")
+def show_skill_verb() -> None:
+    """Show NotebookLM skill content."""
+    skill_show()
+
+
+# =============================================================================
+# INSTALL verb (for skills)
+# =============================================================================
+
+install_app = typer.Typer(help="Install resources (skills)")
+
+
+@install_app.command("skill")
+def install_skill_verb(
+    tool: str = typer.Argument(..., help="Tool to install skill for (claude-code, opencode, gemini-cli, antigravity, codex, other)"),
+    level: str = typer.Option("user", "--level", "-l", help="Install at user level (~/.config) or project level (./)"),
+) -> None:
+    """Install NotebookLM skill for an AI tool."""
+    skill_install(tool, level)
+
+
+# =============================================================================
+# UNINSTALL verb (for skills)
+# =============================================================================
+
+uninstall_app = typer.Typer(help="Uninstall resources (skills)")
+
+
+@uninstall_app.command("skill")
+def uninstall_skill_verb(
+    tool: str = typer.Argument(..., help="Tool to uninstall skill from"),
+    level: str = typer.Option("user", "--level", "-l", help="Uninstall from user or project level"),
+) -> None:
+    """Remove installed NotebookLM skill."""
+    skill_uninstall(tool, level)
+

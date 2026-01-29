@@ -48,6 +48,8 @@ from notebooklm_tools.cli.commands.verbs import (
     download_app as download_verb_app,
     set_app,
     show_app,
+    install_app,
+    uninstall_app,
 )
 
 console = Console()
@@ -106,6 +108,8 @@ app.add_typer(configure_app, name="configure", help="Configure settings")
 app.add_typer(download_verb_app, name="download-verb", help="Download studio artifacts (verb-first)")
 app.add_typer(set_app, name="set", help="Set values (aliases, config)")
 app.add_typer(show_app, name="show", help="Show information")
+app.add_typer(install_app, name="install", help="Install resources (skills)")
+app.add_typer(uninstall_app, name="uninstall", help="Uninstall resources (skills)")
 
 
 @app.command("login")

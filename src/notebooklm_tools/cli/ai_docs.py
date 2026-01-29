@@ -121,7 +121,9 @@ nlm status artifacts <notebook>
 | `nlm status` | Check status (artifacts, research) |
 | `nlm configure` | Configure settings (chat) |
 | `nlm set` | Set values (alias, config) |
-| `nlm show` | Show information (config, aliases) |
+| `nlm show` | Show information (config, aliases, skill) |
+| `nlm install` | Install resources (skill) |
+| `nlm uninstall` | Uninstall resources (skill) |
 | `nlm download-verb` | Download artifacts (audio, video, report, mind-map, slides, infographic, data-table) |
 | `nlm research-verb` | Research commands (start, import) |
 
@@ -596,6 +598,7 @@ nlm skill show                              # Display skill content
 
 **Supported Tools:**
 - `claude-code` - Claude Code CLI and Desktop (`~/.claude/skills/nlm-skill/`)
+- `cursor` - Cursor AI editor (`~/.cursor/skills/nlm-skill/`)
 - `opencode` - OpenCode AI assistant (`~/.config/opencode/skills/nlm-skill/`)
 - `gemini-cli` - Google Gemini CLI (`~/.gemini/skills/nlm-skill/`)
 - `antigravity` - Antigravity agent framework (`~/.gemini/antigravity/skills/nlm-skill/`)
@@ -632,6 +635,15 @@ nlm skill show | head -50
 For Codex, it appends a compact section to AGENTS.md with markers for easy removal.
 
 **Note:** If the parent directory doesn't exist (e.g., `~/.claude/` for Claude Code), the installer will prompt you to either create it, switch to project-level installation, or cancel.
+
+**Verb-First Alternatives:**
+```bash
+nlm install skill claude-code              # Same as: nlm skill install claude-code
+nlm install skill cursor --level project  # Install for Cursor at project level
+nlm uninstall skill gemini-cli             # Same as: nlm skill uninstall gemini-cli
+nlm list skills                            # Same as: nlm skill list
+nlm show skill                             # Same as: nlm skill show
+```
 
 ### Config Commands
 

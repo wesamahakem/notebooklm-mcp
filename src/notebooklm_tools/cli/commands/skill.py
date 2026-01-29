@@ -23,6 +23,12 @@ TOOL_CONFIGS = {
         "format": "skill.md",
         "description": "Claude Code CLI and Desktop",
     },
+    "cursor": {
+        "user": Path.home() / ".cursor/skills/nlm-skill",
+        "project": Path(".cursor/skills/nlm-skill"),
+        "format": "skill.md",
+        "description": "Cursor AI editor",
+    },
     "codex": {
         "user": Path.home() / ".codex/AGENTS.md",
         "project": Path("AGENTS.md"),

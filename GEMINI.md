@@ -126,5 +126,8 @@ uv run pytest tests/test_api_client.py
 
 ## Recent Additions
 
+- **Skill Commands**: `nlm skill install/uninstall/list/show` for AI assistant integration
+- **Cursor Support**: Added Cursor AI editor to supported skill targets
+- **Verb-First Commands**: Alternative command style (`nlm install skill`, `nlm list skills`)
 - **Interactive Artifact Downloads**: `download_quiz` and `download_flashcards` with JSON/Markdown/HTML formats
 - **Sharing API**: `notebook_share_status`, `notebook_share_public`, `notebook_share_invite` for collaboration

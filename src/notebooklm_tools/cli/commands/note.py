@@ -127,13 +127,13 @@ def update_note(
 def delete_note(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     note_id: str = typer.Argument(..., help="Note ID to delete"),
-    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation"),
+    confirm: bool = typer.Option(False, "--confirm", "-y", help="Skip confirmation"),
     profile: Optional[str] = typer.Option(None, "--profile", "-p", help="Profile to use"),
 ) -> None:
     """Delete a note permanently."""
-    if not yes:
-        confirm = typer.confirm(f"Delete note {note_id}? This action is IRREVERSIBLE.")
-        if not confirm:
+    if not confirm:
+        confirmed = typer.confirm(f"Delete note {note_id}? This action is IRREVERSIBLE.")
+        if not confirmed:
             console.print("[dim]Cancelled[/dim]")
             raise typer.Exit(0)
 
