@@ -376,6 +376,21 @@ Confirmed. Create with confirm=True.
 
 ---
 
+### Test 5.1b - Create Audio with Custom Prompt (Verify Extraction)
+**Tool:** `studio_create`
+
+**Prompt:**
+```
+Create an audio overview for notebook [notebook_id] with a focus prompt:
+- artifact_type: audio
+- focus_prompt: "Explain this to a 5 year old."
+- confirm: True
+```
+
+**Expected:** Audio generation started. We will verify the prompt "Explain this to a 5 year old" appears in Test 5.10.
+
+---
+
 ### Test 5.2 - Create Video Overview
 **Tool:** `studio_create`
 
@@ -508,7 +523,9 @@ Create a data table for notebook [notebook_id]:
 Check studio content generation status for notebook [notebook_id].
 ```
 
-**Expected:** List of artifacts with status (in_progress/completed) and URLs.
+**Expected:**
+- List of artifacts with status (in_progress/completed) and URLs.
+- **Verify:** Artifact from Test 5.1b shows `custom_instructions: "Explain this to a 5 year old"`.
 
 ---
 
