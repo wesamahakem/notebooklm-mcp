@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.14] - 2026-02-03
+
+### Fixed
+- **Automatic migration from old location** - Auth tokens and Chrome profiles are automatically migrated from `~/.notebooklm-mcp/` to `~/.notebooklm-mcp-cli/` on first use. Users upgrading from older versions don't need to re-authenticate.
+
 ## [0.2.13] - 2026-02-03
 
 ### Fixed
 - **Unified storage location** - Consolidated all storage to `~/.notebooklm-mcp-cli/`. Previously some code still referenced the old `~/.notebooklm-mcp/` location, causing confusion. Now everything uses the single unified location.
+- **Note**: v0.2.13 was missing migration support - upgrade to v0.2.14 instead.
 
 ## [0.2.12] - 2026-02-03
 

@@ -1,9 +1,9 @@
 """Configuration management for NotebookLM MCP CLI.
 
 Uses ~/.notebooklm-mcp-cli/ for all data (config, profiles, Chrome profile).
-Supports migration from old locations:
-- ~/.notebooklm-tools/ (previous unified location)  
-- ~/Library/Application Support/nlm/ (old CLI location on macOS)
+Supports automatic migration from old locations:
+- ~/.notebooklm-mcp/ (old MCP-only location, pre-0.2.13)
+- ~/.nlm/ (old CLI location)
 """
 
 import os
@@ -97,9 +97,15 @@ def get_auth_cache_file() -> Path:
 # Migration Support
 # =============================================================================
 
-# Old locations for Chrome profiles
+# Old locations for Chrome profiles (checked for migration)
 OLD_CHROME_PROFILES = [
+    Path.home() / ".notebooklm-mcp" / "chrome-profile",  # Old MCP (pre-0.2.13)
     Path.home() / ".nlm" / "chrome-profile",  # Old CLI
+]
+
+# Old locations for auth.json (checked for migration)
+OLD_AUTH_LOCATIONS = [
+    Path.home() / ".notebooklm-mcp" / "auth.json",  # Old MCP (pre-0.2.13)
 ]
 
 # Old locations for aliases
@@ -118,10 +124,12 @@ def check_migration_sources() -> dict[str, list[Path]]:
     
     Returns dict with:
         - chrome_profiles: list of existing Chrome profile directories
+        - auth_files: list of existing auth.json files
         - aliases: list of existing alias files
     """
     result = {
         "chrome_profiles": [],
+        "auth_files": [],
         "aliases": [],
     }
     
@@ -129,11 +137,37 @@ def check_migration_sources() -> dict[str, list[Path]]:
         if profile_path.exists() and profile_path.is_dir():
             result["chrome_profiles"].append(profile_path)
     
+    for auth_path in OLD_AUTH_LOCATIONS:
+        if auth_path.exists() and auth_path.is_file():
+            result["auth_files"].append(auth_path)
+    
     for alias_path in OLD_ALIAS_LOCATIONS:
         if alias_path.exists() and alias_path.is_file():
             result["aliases"].append(alias_path)
     
     return result
+
+
+def migrate_auth_file(source_path: Path, dry_run: bool = True) -> str | None:
+    """Migrate auth.json from old location.
+    
+    Args:
+        source_path: Path to the old auth.json file
+        dry_run: If True, only report what would be done
+        
+    Returns:
+        Action description if migration was done, None if skipped
+    """
+    new_auth = get_storage_dir() / "auth.json"
+    
+    if new_auth.exists():
+        return None  # Already have auth, don't overwrite
+    
+    action = f"Copy auth tokens from {source_path}"
+    if not dry_run:
+        shutil.copy2(source_path, new_auth)
+    
+    return action
 
 
 def migrate_aliases(source_path: Path, dry_run: bool = True) -> str | None:
@@ -196,6 +230,13 @@ def run_migration(dry_run: bool = True, prefer_source: str | None = None) -> lis
     actions = []
     sources = check_migration_sources()
     
+    # Migrate auth.json (first one found wins)
+    for auth_path in sources["auth_files"]:
+        action = migrate_auth_file(auth_path, dry_run)
+        if action:
+            actions.append(action)
+            break  # Only migrate once
+    
     # Migrate aliases (first one found wins)
     for alias_path in sources["aliases"]:
         action = migrate_aliases(alias_path, dry_run)
@@ -211,6 +252,11 @@ def run_migration(dry_run: bool = True, prefer_source: str | None = None) -> lis
             sources["chrome_profiles"].sort(
                 key=lambda p: 0 if ".nlm" in str(p) else 1
             )
+        elif prefer_source == "mcp":
+            # Prefer MCP location
+            sources["chrome_profiles"].sort(
+                key=lambda p: 0 if ".notebooklm-mcp" in str(p) else 1
+            )
         
         # Use the first available
         for profile_path in sources["chrome_profiles"]:
@@ -220,6 +266,29 @@ def run_migration(dry_run: bool = True, prefer_source: str | None = None) -> lis
                 break  # Only migrate once
     
     return actions
+
+
+def auto_migrate_if_needed() -> list[str]:
+    """Automatically migrate data from old locations if new location is empty.
+    
+    This is called automatically when accessing storage to ensure seamless
+    upgrade experience. Users don't need to do anything manually.
+    
+    Returns:
+        List of migration actions performed (empty if nothing migrated)
+    """
+    storage = get_storage_dir()
+    
+    # Check if new location already has data
+    has_auth = (storage / "auth.json").exists()
+    has_chrome = (storage / "chrome-profile").exists() or (storage / "chrome-profiles").exists()
+    
+    # If we already have data, no migration needed
+    if has_auth and has_chrome:
+        return []
+    
+    # Run migration (not dry run)
+    return run_migration(dry_run=False)
 
 
 # =============================================================================

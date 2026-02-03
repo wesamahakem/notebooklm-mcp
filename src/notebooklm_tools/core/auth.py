@@ -87,8 +87,14 @@ def load_cached_tokens() -> AuthTokens | None:
     except Exception:
         pass
 
-    # 2. Fallback to legacy auth cache
+    # 2. Fallback to legacy auth cache (with auto-migration)
     cache_path = get_cache_path()
+    
+    # Auto-migrate from old location if needed
+    if not cache_path.exists():
+        from notebooklm_tools.utils.config import auto_migrate_if_needed
+        auto_migrate_if_needed()
+    
     if not cache_path.exists():
         return None
 

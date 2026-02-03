@@ -62,14 +62,39 @@ def get_cache_path() -> Path:
     return cache_dir / "auth.json"
 
 
+def _try_migrate_from_old_location() -> bool:
+    """Try to migrate auth.json from old ~/.notebooklm-mcp/ location.
+    
+    Returns True if migration was performed.
+    """
+    new_path = get_cache_path()
+    if new_path.exists():
+        return False  # Already have auth, no migration needed
+    
+    old_path = Path.home() / ".notebooklm-mcp" / "auth.json"
+    if old_path.exists():
+        import shutil
+        shutil.copy2(old_path, new_path)
+        return True
+    
+    return False
+
+
 def load_cached_tokens() -> AuthTokens | None:
     """Load tokens from cache if they exist.
 
     Note: We no longer reject tokens based on age. The functional check
     (redirect to login during CSRF refresh) is the real validity test.
     Cookies often last much longer than any arbitrary time limit.
+    
+    Automatically migrates from old ~/.notebooklm-mcp/ location if needed.
     """
     cache_path = get_cache_path()
+    
+    # Try migration if cache doesn't exist
+    if not cache_path.exists():
+        _try_migrate_from_old_location()
+    
     if not cache_path.exists():
         return None
 
