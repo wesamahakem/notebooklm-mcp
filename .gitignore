@@ -67,3 +67,7 @@ downloads/
 .claude/
 run*.notebooklm-py-analysis/
 *.code-workspace
+
+# Untested/experimental
+desktop-extension/
+notebooklm-mcp.mcpb
