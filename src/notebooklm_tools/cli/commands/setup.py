@@ -68,6 +68,50 @@ def _add_mcp_server(config: dict, key: str = "notebooklm-mcp", extra: Optional[d
     return config
 
 
+def _claude_desktop_app_support_dir() -> Path:
+    """Get the Claude Desktop Application Support directory (platform-specific)."""
+    system = platform.system()
+    if system == "Darwin":
+        return Path.home() / "Library" / "Application Support" / "Claude"
+    elif system == "Windows":
+        appdata = Path(os.environ.get("APPDATA", ""))
+        return appdata / "Claude"
+    else:  # Linux
+        return Path.home() / ".config" / "claude"
+
+
+def _check_claude_desktop_extension() -> tuple[bool, bool, Optional[str]]:
+    """Check if notebooklm-mcp is installed as a Claude Desktop Extension (.mcpb).
+
+    Returns:
+        (installed, enabled, version):
+            installed: True if the extension is registered in extensions-installations.json
+            enabled: True if the extension is enabled in its settings file
+            version: The installed extension version string, or None
+    """
+    app_dir = _claude_desktop_app_support_dir()
+    installations_path = app_dir / "extensions-installations.json"
+
+    installations = _read_json_config(installations_path)
+    extensions = installations.get("extensions", {})
+
+    # Search for any extension whose manifest name contains 'notebooklm'
+    for ext_id, ext_data in extensions.items():
+        manifest = ext_data.get("manifest", {})
+        name = manifest.get("name", "")
+        if "notebooklm" in name.lower():
+            version = manifest.get("version")
+
+            # Check if the extension is enabled
+            settings_path = app_dir / "Claude Extensions Settings" / f"{ext_id}.json"
+            settings = _read_json_config(settings_path)
+            enabled = settings.get("isEnabled", False)
+
+            return True, enabled, version
+
+    return False, False, None
+
+
 # =============================================================================
 # Client-specific config paths
 # =============================================================================
@@ -154,7 +198,7 @@ CLIENT_REGISTRY = {
 }
 
 
-def _complete_client(incomplete: str) -> list[str]:
+def _complete_client(ctx, param, incomplete: str) -> list[str]:
     """Shell completion for client names."""
     return [name for name in CLIENT_REGISTRY if name.startswith(incomplete)]
 
@@ -414,7 +458,19 @@ def setup_list() -> None:
             config = _read_json_config(path)
             if _is_configured(config):
                 status = "[green]✓[/green]"
-            config_path = str(path).replace(str(Path.home()), "~")
+                config_path = str(path).replace(str(Path.home()), "~")
+            else:
+                # Check for .mcpb extension installation
+                ext_installed, ext_enabled, ext_version = _check_claude_desktop_extension()
+                if ext_installed:
+                    ver_label = f" v{ext_version}" if ext_version else ""
+                    if ext_enabled:
+                        status = f"[green]✓[/green] [dim](extension{ver_label})[/dim]"
+                    else:
+                        status = f"[yellow]✓[/yellow] [dim](extension{ver_label}, disabled)[/dim]"
+                    config_path = "Settings > Extensions"
+                else:
+                    config_path = str(path).replace(str(Path.home()), "~")
 
         elif client_id == "gemini":
             path = _gemini_config_path()
