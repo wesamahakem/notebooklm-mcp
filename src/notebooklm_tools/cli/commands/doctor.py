@@ -213,6 +213,7 @@ def _check_clients(verbose: bool) -> bool:
         _windsurf_config_path,
         _read_json_config,
         _is_configured,
+        _check_claude_desktop_extension,
     )
 
     import subprocess
@@ -247,7 +248,21 @@ def _check_clients(verbose: bool) -> bool:
         elif client_id == "claude-desktop":
             path = _claude_desktop_config_path()
             config = _read_json_config(path)
-            status = _is_configured(config)
+            if _is_configured(config):
+                status = True
+            else:
+                # Check for .mcpb extension installation
+                ext_installed, ext_enabled, ext_version = _check_claude_desktop_extension()
+                if ext_installed:
+                    ver_label = f" v{ext_version}" if ext_version else ""
+                    if ext_enabled:
+                        console.print(f"  {info['name']}: [green]configured[/green] [dim](extension{ver_label})[/dim]")
+                    else:
+                        console.print(f"  {info['name']}: [yellow]configured but disabled[/yellow] [dim](extension{ver_label})[/dim]")
+                    configured_count += 1
+                    continue
+                else:
+                    status = False
 
         elif client_id == "gemini":
             path = _gemini_config_path()
