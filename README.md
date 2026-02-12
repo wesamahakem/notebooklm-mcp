@@ -45,9 +45,10 @@ Run `nlm --ai` for comprehensive AI-assistant documentation.
 Connect AI assistants (Claude, Gemini, Cursor, etc.) to NotebookLM:
 
 ```bash
-# Add to Claude Code or Gemini CLI
-claude mcp add --scope user notebooklm-mcp notebooklm-mcp
-gemini mcp add --scope user notebooklm-mcp notebooklm-mcp
+# Automatic setup — picks the right config for each tool
+nlm setup add claude-code
+nlm setup add gemini
+nlm setup add cursor
 ```
 
 Then use natural language: *"Create a notebook about quantum computing and generate a podcast"*
@@ -65,6 +66,8 @@ Then use natural language: *"Create a notebook about quantum computing and gener
 | Web/Drive research | `nlm research start` | `research_start` |
 | Share notebook | `nlm share public/invite` | `notebook_share_*` |
 | Sync Drive sources | `nlm source sync` | `source_sync_drive` |
+| Configure AI tools | `nlm setup add/remove/list` | — |
+| Diagnose issues | `nlm doctor` | — |
 
 📚 **More Documentation:**
 - **[CLI Guide](docs/CLI_GUIDE.md)** — Complete command reference
@@ -222,12 +225,11 @@ rm -rf ~/.notebooklm-mcp-cli
 
 Also remove from your AI tools:
 
-| Tool | Command |
-|------|---------|
-| Claude Code | `claude mcp remove notebooklm-mcp` |
-| Gemini CLI | `gemini mcp remove notebooklm-mcp` |
-| Claude Desktop | Settings → Extensions → Remove |
-| Cursor/VS Code | Remove entry from `~/.cursor/mcp.json` or `~/.vscode/mcp.json` |
+```bash
+nlm setup remove claude-code
+nlm setup remove cursor
+# ... or any configured tool
+```
 
 ## Authentication
 
@@ -278,15 +280,63 @@ For detailed instructions and troubleshooting, see **[docs/AUTHENTICATION.md](do
 
 > **⚠️ Context Window Warning:** This MCP provides **29 tools**. Disable it when not using NotebookLM to preserve context. In Claude Code: `@notebooklm-mcp` to toggle.
 
-### Quick Setup
+### Automatic Setup (Recommended)
 
-**Claude Code / Gemini CLI:**
+Use `nlm setup` to automatically configure the MCP server for your AI tools — no manual JSON editing required:
+
+```bash
+# Add to any supported tool
+nlm setup add claude-code
+nlm setup add claude-desktop
+nlm setup add gemini
+nlm setup add cursor
+nlm setup add windsurf
+
+# Check which tools are configured
+nlm setup list
+
+# Diagnose installation & auth issues
+nlm doctor
+```
+
+### Remove from a tool
+
+```bash
+nlm setup remove claude-code
+```
+
+### Using uvx (No Install Required)
+
+If you don't want to install the package, you can use `uvx` to run on-the-fly:
+
+```bash
+# Run CLI commands directly
+uvx --from notebooklm-mcp-cli nlm setup add cursor
+uvx --from notebooklm-mcp-cli nlm login
+```
+
+For tools that use JSON config, point them to uvx:
+```json
+{
+  "mcpServers": {
+    "notebooklm-mcp": {
+      "command": "uvx",
+      "args": ["--from", "notebooklm-mcp-cli", "notebooklm-mcp"]
+    }
+  }
+}
+```
+
+<details>
+<summary>Manual Setup (if you prefer)</summary>
+
+**Claude Code / Gemini CLI** support adding MCP servers via their own CLI:
 ```bash
 claude mcp add --scope user notebooklm-mcp notebooklm-mcp
 gemini mcp add --scope user notebooklm-mcp notebooklm-mcp
 ```
 
-**Cursor / VS Code / Claude Desktop** — Add to your config file:
+**Cursor / Windsurf** resolve commands from your `PATH`, so the command name is enough:
 ```json
 {
   "mcpServers": {
@@ -300,20 +350,27 @@ gemini mcp add --scope user notebooklm-mcp notebooklm-mcp
 | Tool | Config Location |
 |------|-----------------|
 | Cursor | `~/.cursor/mcp.json` |
-| VS Code | `~/.vscode/mcp.json` |
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
 
-**Run without installing (uvx):**
+**Claude Desktop / VS Code** may not resolve `PATH` — use the full path to the binary:
 ```json
 {
   "mcpServers": {
     "notebooklm-mcp": {
-      "command": "uvx",
-      "args": ["--from", "notebooklm-mcp-cli", "notebooklm-mcp"]
+      "command": "/full/path/to/notebooklm-mcp"
     }
   }
 }
 ```
+
+Find your path with: `which notebooklm-mcp`
+
+| Tool | Config Location |
+|------|-----------------|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| VS Code | `~/.vscode/mcp.json` |
+
+</details>
 
 📚 **Full configuration details:** [MCP Guide](docs/MCP_GUIDE.md) — Server options, environment variables, HTTP transport, multi-user setup, and context window management.
 
