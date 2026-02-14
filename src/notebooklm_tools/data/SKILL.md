@@ -279,13 +279,17 @@ nlm report create <id> --format "Create Your Own" --prompt "Custom..." --confirm
 # Quiz
 nlm quiz create <id> --confirm
 nlm quiz create <id> --count 5 --difficulty 3 --confirm
+nlm quiz create <id> --count 10 --difficulty 3 --focus "Focus on key concepts" --confirm
 # Count: number of questions (default: 2)
 # Difficulty: 1-5 (1=easy, 5=hard)
+# Focus: optional text to guide quiz generation
 
 # Flashcards
 nlm flashcards create <id> --confirm
 nlm flashcards create <id> --difficulty hard --confirm
+nlm flashcards create <id> --difficulty medium --focus "Focus on definitions" --confirm
 # Difficulty: easy, medium, hard
+# Focus: optional text to guide flashcard generation
 
 # Mind Map
 nlm mindmap create <id> --confirm
@@ -342,6 +346,8 @@ nlm studio delete <nb-id> <artifact-id> --confirm
 ```
 
 **Status values**: `completed` (✓), `in_progress` (●), `failed` (✗)
+
+**Prompt Extraction**: The `studio_status` tool returns a `custom_instructions` field for each artifact. This contains the original focus prompt or custom instructions used to generate that artifact (e.g., the prompt for a "Create Your Own" report, or the focus topic for an Audio Overview). This is useful for retrieving the exact prompt that generated a successful artifact.
 
 ### Renaming Artifacts
 
@@ -523,8 +529,8 @@ nlm source list <id>
 
 ```bash
 nlm report create <id> --format "Study Guide" --confirm
-nlm quiz create <id> --count 10 --difficulty 3 --confirm
-nlm flashcards create <id> --difficulty medium --confirm
+nlm quiz create <id> --count 10 --difficulty 3 --focus "Exam prep" --confirm
+nlm flashcards create <id> --difficulty medium --focus "Core terms" --confirm
 ```
 
 ### Pattern 4: Drive Document Workflow

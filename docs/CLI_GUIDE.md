@@ -97,8 +97,8 @@ nlm report create <notebook> --format "Briefing Doc" --confirm
 # Formats: "Briefing Doc", "Study Guide", "Blog Post", "Create Your Own"
 
 # Quiz & Flashcards
-nlm quiz create <notebook> --count 10 --difficulty medium --confirm
-nlm flashcards create <notebook> --difficulty hard --confirm
+nlm quiz create <notebook> --count 10 --difficulty medium --focus "Focus on key concepts" --confirm
+nlm flashcards create <notebook> --difficulty hard --focus "Focus on definitions" --confirm
 
 # Other
 nlm mindmap create <notebook> --confirm

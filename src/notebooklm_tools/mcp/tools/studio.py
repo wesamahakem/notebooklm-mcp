@@ -157,6 +157,19 @@ def studio_status(
             - rename: Rename an artifact (requires artifact_id and new_title)
         artifact_id: Required for action="rename" - the artifact UUID to rename
         new_title: Required for action="rename" - the new title for the artifact
+
+    Returns:
+        Dictionary with status and results.
+        For action="status":
+            - status: "success"
+            - artifacts: List of artifacts, each containing:
+                - artifact_id: UUID
+                - title: Artifact title
+                - type: audio, video, report, etc.
+                - status: completed, in_progress, failed
+                - url: URL to view/download (if applicable)
+                - custom_instructions: The custom prompt/focus instructions used to generate the artifact (if any)
+            - summary: Counts of total, completed, in_progress
     """
     try:
         client = get_client()

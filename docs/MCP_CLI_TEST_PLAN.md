@@ -450,7 +450,7 @@ Create a report for notebook [notebook_id]:
 
 ### Test 5.4 - Create Flashcards
 **Tool:** `studio_create`
-**CLI:** `nlm flashcards create [notebook_id] --difficulty medium --confirm`
+**CLI:** `nlm flashcards create [notebook_id] --difficulty medium --focus "Focus on definitions" --confirm`
 
 **Prompt:**
 ```
@@ -466,7 +466,7 @@ Create flashcards for notebook [notebook_id]:
 
 ### Test 5.5 - Create Quiz
 **Tool:** `studio_create`
-**CLI:** `nlm quiz create [notebook_id] --count 2 --difficulty 2 --confirm`
+**CLI:** `nlm quiz create [notebook_id] --count 2 --difficulty 2 --focus "Focus on integration testing" --confirm`
 
 **Prompt:**
 ```

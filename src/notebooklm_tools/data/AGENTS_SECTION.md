@@ -48,8 +48,8 @@ nlm source add <id> --drive <doc-id>
 **Study Materials:**
 ```bash
 nlm report create <id> --format "Study Guide" --confirm
-nlm quiz create <id> --count 10 --confirm
-nlm flashcards create <id> --confirm
+nlm quiz create <id> --count 10 --focus "Key Concepts" --confirm
+nlm flashcards create <id> --focus "Vocabulary" --confirm
 ```
 
 ### Full Documentation

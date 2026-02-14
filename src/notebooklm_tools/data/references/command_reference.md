@@ -420,9 +420,10 @@ nlm quiz create <notebook-id> [OPTIONS]
 ```
 
 | Option | Values | Default |
-|--------|--------|---------|
+|--------|--------|---------|  
 | `--count` | Number of questions | 2 |
 | `--difficulty` | 1-5 (1=easy, 5=hard) | 2 |
+| `--focus` | Focus text/topic | |
 
 ### nlm flashcards create
 
@@ -435,6 +436,7 @@ nlm flashcards create <notebook-id> [OPTIONS]
 | Option | Values | Default |
 |--------|--------|---------|
 | `--difficulty` | `easy`, `medium`, `hard` | `medium` |
+| `--focus` | Focus text/topic | |
 
 ### nlm mindmap create
 

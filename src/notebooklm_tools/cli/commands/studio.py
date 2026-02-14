@@ -280,6 +280,7 @@ def create_quiz(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     count: int = typer.Option(2, "--count", "-c", help="Number of questions"),
     difficulty: int = typer.Option(2, "--difficulty", "-d", help="Difficulty 1-5 (1=easy, 5=hard)"),
+    focus: Optional[str] = typer.Option(None, "--focus", "-f", help="Focus prompt to guide generation"),
     source_ids: Optional[str] = typer.Option(None, "--source-ids", "-s", help="Comma-separated source IDs"),
     confirm: bool = typer.Option(False, "--confirm", "-y", help="Skip confirmation"),
     profile: Optional[str] = typer.Option(None, "--profile", "-p", help="Profile to use"),
@@ -303,6 +304,7 @@ def create_quiz(
                     question_count=count,
                     difficulty=difficulty,
                     source_ids=parse_source_ids(source_ids),
+                    focus_prompt=focus or "",
                 )
 
         if not result or not result.get("artifact_id"):
@@ -326,6 +328,7 @@ def create_quiz(
 def create_flashcards(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     difficulty: str = typer.Option("medium", "--difficulty", "-d", help="Difficulty: easy, medium, hard"),
+    focus: Optional[str] = typer.Option(None, "--focus", "-f", help="Focus prompt to guide generation"),
     source_ids: Optional[str] = typer.Option(None, "--source-ids", "-s", help="Comma-separated source IDs"),
     confirm: bool = typer.Option(False, "--confirm", "-y", help="Skip confirmation"),
     profile: Optional[str] = typer.Option(None, "--profile", "-p", help="Profile to use"),
@@ -339,6 +342,7 @@ def create_flashcards(
         profile=profile,
         source_ids=parse_source_ids(source_ids),
         difficulty=difficulty,
+        focus_prompt=focus or "",
     )
 
 

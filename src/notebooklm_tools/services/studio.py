@@ -297,6 +297,7 @@ def _dispatch_create(
         return client.create_flashcards(
             notebook_id, source_ids=source_ids,
             difficulty_code=difficulty_code,
+            focus_prompt=kwargs["focus_prompt"],
         )
 
     elif artifact_type == "quiz":
@@ -305,6 +306,7 @@ def _dispatch_create(
             notebook_id, source_ids=source_ids,
             question_count=kwargs["question_count"],
             difficulty=difficulty_code,
+            focus_prompt=kwargs["focus_prompt"],
         )
 
     elif artifact_type == "data_table":
